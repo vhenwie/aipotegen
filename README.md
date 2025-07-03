@@ -14,7 +14,7 @@ Below is a gallery showcasing key screenshots of the n8n workflow nodes and flow
 
 ### RAG (Retrieval-Augmented Generation) System and OCR System
 
-![RAG System](./images/ocr-nodes.png)
+![RAG System](./images/02_-_RAG_System_for_PDF_TENDERS.png)
 
 ---
 
