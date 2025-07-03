@@ -1,0 +1,633 @@
+{
+  "name": "01 - AI-Powered Tender & Methodology Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "AI-Powered Tender & Methodology Automation",
+        "formDescription": "This automation cuts preparation time by up to 70%, improves compliance and asset accuracy above 90%, and positions the company as a data-driven, scalable partner for complex construction projects.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Upload Tender",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -480,
+        -80
+      ],
+      "id": "527ce2a4-b66d-45ca-a3f9-866715b229ec",
+      "name": "On form submission of Tender pdf",
+      "webhookId": "d1e9b114-6f75-43f7-a9e8-4a79ae1ab9fd"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.retrieverVectorStore",
+      "typeVersion": 1,
+      "position": [
+        80,
+        142.5
+      ],
+      "id": "ff2dfd66-67d6-48f2-8c0a-01c8a7e595d6",
+      "name": "Vector Store Retriever"
+    },
+    {
+      "parameters": {
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "tender_sample",
+          "mode": "list",
+          "cachedResultName": "tender_sample"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        340
+      ],
+      "id": "369a5989-b8f5-4faa-b61b-e18075fa45b7",
+      "name": "Qdrant Vector Store",
+      "credentials": {
+        "qdrantApi": {
+          "id": "TFBh9VAll8jhIGr1",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-r1-0528-qwen3-8b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        140
+      ],
+      "id": "9b4fc91f-0630-4496-b46a-f923a24e9606",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "XtRUkGsjNEoNEkW1",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "wyjk7jV64Ns1DXUg",
+          "mode": "list",
+          "cachedResultName": "02 - RAG System for PDF TENDERS"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -260,
+        -80
+      ],
+      "id": "2fedde80-a3ea-4d01-a2da-f3357f3749ba",
+      "name": "Enable RAG"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        535
+      ],
+      "id": "be4c3146-5277-45f3-801e-639cb701af55",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "mQgayokz2EWlOTIs",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Extract all requirements, risks, and deadlines from the following tender text. Return as structured JSON.\n===\n {{ $json.combinedMarkdown }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainRetrievalQa",
+      "typeVersion": 1.6,
+      "position": [
+        -20,
+        -80
+      ],
+      "id": "a203a5dd-7c3c-4e00-8048-b605850e7ffb",
+      "name": "Extract Requirements"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.retrieverVectorStore",
+      "typeVersion": 1,
+      "position": [
+        560,
+        142.5
+      ],
+      "id": "daa1300c-b70d-456e-a820-fc6ca8889fab",
+      "name": "Vector Store Retriever1"
+    },
+    {
+      "parameters": {
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "tender_sample",
+          "mode": "list",
+          "cachedResultName": "tender_sample"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        560,
+        340
+      ],
+      "id": "05d61836-7763-4a7c-a01b-f267833c316d",
+      "name": "Qdrant Vector Store1",
+      "credentials": {
+        "qdrantApi": {
+          "id": "TFBh9VAll8jhIGr1",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-r1-0528-qwen3-8b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        440,
+        140
+      ],
+      "id": "033f62fc-666b-457f-9223-8e5f2281e5f9",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "XtRUkGsjNEoNEkW1",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        640,
+        535
+      ],
+      "id": "72c2d639-a672-4983-8028-83466a1a2125",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "mQgayokz2EWlOTIs",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Using the extracted requirements, risks, and deadlines, draft a 1500-word methodology statement suitable for a construction tender submission. Use formal business language and include all requiredsections.\n===\n {{ $json.combinedMarkdown }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainRetrievalQa",
+      "typeVersion": 1.6,
+      "position": [
+        460,
+        -80
+      ],
+      "id": "5e551d2a-79a7-4e5d-820b-4063ee879805",
+      "name": "Generate Methodology Statement"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.retrieverVectorStore",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        142.5
+      ],
+      "id": "7e346789-2421-45dd-a28c-5364ab8eeed4",
+      "name": "Vector Store Retriever2"
+    },
+    {
+      "parameters": {
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "tender_sample",
+          "mode": "list",
+          "cachedResultName": "tender_sample"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        1040,
+        340
+      ],
+      "id": "ef898ebe-acdd-4fa9-bf9b-e6803d7f494b",
+      "name": "Qdrant Vector Store2",
+      "credentials": {
+        "qdrantApi": {
+          "id": "TFBh9VAll8jhIGr1",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-r1-0528-qwen3-8b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        920,
+        140
+      ],
+      "id": "83e75db6-80fa-42e1-a9d1-e3086de090b1",
+      "name": "OpenRouter Chat Model2",
+      "credentials": {
+        "openRouterApi": {
+          "id": "XtRUkGsjNEoNEkW1",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1120,
+        535
+      ],
+      "id": "6a5b1c54-b024-4c64-af3d-f2a92e4e3e96",
+      "name": "Embeddings OpenAI2",
+      "credentials": {
+        "openAiApi": {
+          "id": "mQgayokz2EWlOTIs",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Review the draft methodology for missing sections (scope, risk, timeline, deliverables). List any missing items.\n===\n {{ $json.combinedMarkdown }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainRetrievalQa",
+      "typeVersion": 1.6,
+      "position": [
+        940,
+        -80
+      ],
+      "id": "cb15fcf0-4648-491e-bf1f-4a0c267f6b86",
+      "name": "QA/Validation"
+    },
+    {
+      "parameters": {
+        "content": "### Using the OCR'ed tender, extract and find all the necessary requirements.",
+        "height": 860,
+        "width": 420,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -70,
+        -185
+      ],
+      "id": "46850e73-d7a4-4dbe-81c9-e3645e59df98",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "### Generate the methodology statement based on the extracted requirements.",
+        "height": 860,
+        "width": 420,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        410,
+        -185
+      ],
+      "id": "3291e844-3d98-4f5c-a7e9-263d54354618",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "### Perform quality-assurance on the results and find  missing sections if any.",
+        "height": 860,
+        "width": 420,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        890,
+        -185
+      ],
+      "id": "019d27ec-165d-4e0b-b32d-82bd98b03f11",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-pdforge.pdforge",
+      "typeVersion": 1,
+      "position": [
+        1400,
+        -80
+      ],
+      "id": "5cda1f15-c347-49b9-873a-a58915ab5e2f",
+      "name": "Generate a final draft of Methodology Statement"
+    },
+    {
+      "parameters": {
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1620,
+        -80
+      ],
+      "id": "717cdb62-a2ce-4cea-876f-1d218a61f476",
+      "name": "Upload draft to drive for manual review.",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "TgjAg16LMRkpJYMp",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission of Tender pdf": {
+      "main": [
+        [
+          {
+            "node": "Enable RAG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store Retriever": {
+      "ai_retriever": [
+        [
+          {
+            "node": "Extract Requirements",
+            "type": "ai_retriever",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Vector Store Retriever",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extract Requirements",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enable RAG": {
+      "main": [
+        [
+          {
+            "node": "Extract Requirements",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store Retriever1": {
+      "ai_retriever": [
+        [
+          {
+            "node": "Generate Methodology Statement",
+            "type": "ai_retriever",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Vector Store1": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Vector Store Retriever1",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Methodology Statement",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Requirements": {
+      "main": [
+        [
+          {
+            "node": "Generate Methodology Statement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Methodology Statement": {
+      "main": [
+        [
+          {
+            "node": "QA/Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store Retriever2": {
+      "ai_retriever": [
+        [
+          {
+            "node": "QA/Validation",
+            "type": "ai_retriever",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Vector Store2": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Vector Store Retriever2",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "QA/Validation",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store2",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "QA/Validation": {
+      "main": [
+        [
+          {
+            "node": "Generate a final draft of Methodology Statement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate a final draft of Methodology Statement": {
+      "main": [
+        [
+          {
+            "node": "Upload draft to drive for manual review.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "66b05928-60c8-4159-a589-1ccfdadbc1cf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "04c9528d323808ea0863776d146dff0b5ae10fa9e6b52128ab90a357a12075ad"
+  },
+  "id": "AAENuCOFLeKRCRgJ",
+  "tags": []
+}

@@ -1,0 +1,478 @@
+{
+  "name": "02 - RAG System for PDF TENDERS",
+  "nodes": [
+    {
+      "parameters": {
+        "batchSize": "={{ $('Convert OCR to JSON Objects').all().length }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1040,
+        235
+      ],
+      "id": "ef5fa683-93cd-411a-9245-0ed9d0559d9c",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "tender_sample",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        1500,
+        235
+      ],
+      "id": "334c1a7f-5887-41bd-acb1-e168d132376c",
+      "name": "Qdrant Vector Store",
+      "credentials": {
+        "qdrantApi": {
+          "id": "TFBh9VAll8jhIGr1",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "3cc69dfd-5d8c-4837-9960-9db5774b6fd8",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        1960,
+        410
+      ],
+      "webhookId": "1000b40d-5dc5-4795-9dd2-8a23653c2b49",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "50bbbc2f-6674-4d5b-a1d2-8d669e749a5b",
+              "name": "markdown",
+              "value": "={{ $json.markdown }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1260,
+        235
+      ],
+      "id": "e8bda089-d992-4867-9044-36d7f5688466",
+      "name": "Map Pages"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        1480,
+        455
+      ],
+      "id": "2e137905-30ef-4529-9874-4ba8c9deb198",
+      "name": "Embeddings Mistral Cloud",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "LcStct5ICG8UXS6A",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "47aee226-d970-4253-83cd-2be850991fc6",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "position": [
+        1600,
+        457.5
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "chunkSize": 400,
+        "chunkOverlap": 40
+      },
+      "id": "b3bc5caa-4710-474a-a054-267be749017f",
+      "name": "Token Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterTokenSplitter",
+      "position": [
+        1680,
+        655
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -60,
+        235
+      ],
+      "id": "14062a17-c3d3-4834-8428-6e732184059c",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.mistral.ai/v1/files",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "mistralCloudApi",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "purpose",
+              "value": "ocr"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "=Upload_Tender"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b14fad51-6687-4fa1-aced-648c80648a18",
+      "name": "Upload TENDER to Mistral",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        160,
+        235
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "LcStct5ICG8UXS6A",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.mistral.ai/v1/files/{{ $json.id }}/url",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "mistralCloudApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "expiry",
+              "value": "24"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "96526664-73ac-49e6-aac2-a9c7608dcb14",
+      "name": "Sign TENDER for Mistral",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        380,
+        235
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "LcStct5ICG8UXS6A",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.mistral.ai/v1/ocr",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "mistralCloudApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"mistral-ocr-latest\",\n  \"document\": {\n    \"type\": \"document_url\",\n    \"document_url\": \"{{ $json.url }}\"\n  },\n  \"include_image_base64\": true\n}",
+        "options": {}
+      },
+      "id": "86130bc1-9480-4ec2-97dc-627ecaf50b17",
+      "name": "OCR TENDER and Output",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        600,
+        235
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "LcStct5ICG8UXS6A",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json.pages;\n\nreturn data.map(entry => ({\n  json: {\n    markdown: entry.markdown\n  }\n}));"
+      },
+      "id": "f7aaa119-04c8-4de7-bd61-746712351f06",
+      "name": "Convert OCR to JSON Objects",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        820,
+        235
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $('OCR TENDER and Output').first().json.pages;\nconst combinedMarkdown = data.map(entry => entry.markdown).join('\\n\\n');\n\nreturn {\n  json: {\n    combinedMarkdown\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1260,
+        35
+      ],
+      "id": "34d62b19-0f67-4eee-ba29-48981771e61c",
+      "name": "Combine OCR to String"
+    },
+    {
+      "parameters": {
+        "content": "## MISTRAL OCR SEGMENT\n\nThis section will upload and do OCR on the TENDER provided",
+        "height": 300,
+        "width": 660,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        100,
+        95
+      ],
+      "id": "b6856c4b-a554-418a-a405-ff450c9ca02e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## RAG\n\nThis is the Retrieval-Augmented Generation system vector.",
+        "height": 680,
+        "width": 420,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1450,
+        115
+      ],
+      "id": "f0424531-9640-4b55-84dc-6c8cc4689b29",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Combine OCR to String",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Map Pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Vector Store": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Pages": {
+      "main": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Mistral Cloud": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Token Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Upload TENDER to Mistral",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload TENDER to Mistral": {
+      "main": [
+        [
+          {
+            "node": "Sign TENDER for Mistral",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sign TENDER for Mistral": {
+      "main": [
+        [
+          {
+            "node": "OCR TENDER and Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OCR TENDER and Output": {
+      "main": [
+        [
+          {
+            "node": "Convert OCR to JSON Objects",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert OCR to JSON Objects": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d1728847-8d42-4079-a7ae-095002d7d211",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "04c9528d323808ea0863776d146dff0b5ae10fa9e6b52128ab90a357a12075ad"
+  },
+  "id": "wyjk7jV64Ns1DXUg",
+  "tags": [
+    {
+      "name": "rag",
+      "id": "7peNS7gQ16hhC31C",
+      "createdAt": "2025-07-03T15:34:18.753Z",
+      "updatedAt": "2025-07-03T15:34:18.753Z"
+    },
+    {
+      "name": "pdf",
+      "id": "iJUtQXuhupCXkMe9",
+      "createdAt": "2025-07-03T15:34:21.787Z",
+      "updatedAt": "2025-07-03T15:34:21.787Z"
+    },
+    {
+      "name": "ocr",
+      "id": "yqGOVYDTVA8pRVO5",
+      "createdAt": "2025-07-03T15:34:29.070Z",
+      "updatedAt": "2025-07-03T15:34:29.070Z"
+    },
+    {
+      "name": "vector",
+      "id": "hx5PdbstZapcZAaR",
+      "createdAt": "2025-07-03T15:34:40.276Z",
+      "updatedAt": "2025-07-03T15:34:40.276Z"
+    }
+  ]
+}
